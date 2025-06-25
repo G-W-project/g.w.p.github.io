@@ -1,4 +1,3 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,7 +10,7 @@
     <h2>Welcome, <span id="userDisplay"></span>!</h2>
     <textarea id="feedbackInput" placeholder="Your feedback..."></textarea>
     <button onclick="submitFeedback()">Submit</button>
-    <h3>Your Feedback</h3>
+    <h3>All Feedback</h3>
     <div id="feedbackList"></div>
     <button onclick="logout()" class="logout">Logout</button>
   </div>
@@ -29,9 +28,8 @@
       const text = input.value.trim();
       if (!text) return;
 
-      const feedback = JSON.parse(localStorage.getItem("feedback") || "{}");
-      if (!feedback[user.username]) feedback[user.username] = [];
-      feedback[user.username].push(text);
+      let feedback = JSON.parse(localStorage.getItem("feedback") || "[]");
+      feedback.push({ username: user.username, message: text });
       localStorage.setItem("feedback", JSON.stringify(feedback));
 
       input.value = "";
@@ -39,10 +37,14 @@
     }
 
     function displayFeedback() {
-      const feedback = JSON.parse(localStorage.getItem("feedback") || "{}");
-      const userFeedback = feedback[user.username] || [];
+      const feedback = JSON.parse(localStorage.getItem("feedback") || "[]");
       const list = document.getElementById("feedbackList");
-      list.innerHTML = userFeedback.map(msg => `<div class="feedback-item">${msg}</div>`).join("");
+
+      list.innerHTML = feedback.map(entry => `
+        <div class="feedback-item">
+          <strong>@${entry.username}</strong><br>${entry.message}
+        </div>
+      `).reverse().join(""); // Show newest first
     }
 
     function logout() {
