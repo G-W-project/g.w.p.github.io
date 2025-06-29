@@ -12,31 +12,56 @@
     <input type="password" id="password" placeholder="Password" />
     <button id="loginBtn">Login</button>
     <p id="message"></p>
+    <div id="userProfile" style="display:none; margin-top: 20px; text-align: center;">
+      <img id="profileImage" src="" alt="Profile Image" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover;" />
+      <h3 id="profileUsername"></h3>
+    </div>
     <p>Don't have an account? <a href="register.html">Register</a></p>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    const firebaseConfig = { apiKey: "AIzaSyBiNKDXds9IWjFAwSbJaNN8Zd37Wujk5Kc", 
-                             authDomain: "grid-walker-project.firebaseapp.com", 
-                             projectId: "grid-walker-project", 
-                             appId: "grid walker project" 
-                           };
+    const firebaseConfig = {
+      apiKey: "AIzaSyBiNKDXds9IWjFAwSbJaNN8Zd37Wujk5Kc",
+      authDomain: "grid-walker-project.firebaseapp.com",
+      projectId: "grid-walker-project",
+      appId: "grid walker project"
+    };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+    const db = getFirestore(app);
 
-    document.getElementById("loginBtn").onclick = async () => {
+    const loginBtn = document.getElementById("loginBtn");
+    const message = document.getElementById("message");
+    const userProfile = document.getElementById("userProfile");
+    const profileImage = document.getElementById("profileImage");
+    const profileUsername = document.getElementById("profileUsername");
+
+    loginBtn.onclick = async () => {
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
-      const message = document.getElementById("message");
 
       try {
-        await signInWithEmailAndPassword(auth, email, password);
+        const userCred = await signInWithEmailAndPassword(auth, email, password);
         message.textContent = "✅ Logged in!";
-        window.location.href = "index.html";
+
+        // Load user profile
+        const userDoc = await getDoc(doc(db, "users", email));
+        if (userDoc.exists()) {
+          const data = userDoc.data();
+          profileUsername.textContent = "@" + (data.username || email);
+          profileImage.src = data.photoURL || "https://via.placeholder.com/100?text=No+Photo";
+          userProfile.style.display = "block";
+        }
+
+        // Optionally redirect after short delay
+        setTimeout(() => {
+          window.location.href = "index.html";
+        }, 2000);
       } catch (error) {
         message.textContent = "❌ " + error.message;
       }
