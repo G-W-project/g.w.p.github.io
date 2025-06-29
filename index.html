@@ -2,155 +2,134 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Feedback & Chat Portal</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Chat Room</title>
 </head>
 <body>
-  <div class="container">
-    <h2>Welcome, <span id="userDisplay"></span>!</h2>
+  <h2>Welcome, <span id="userEmail"></span>!</h2>
 
-    <!-- Feedback/Chat Input -->
-    <textarea id="feedbackInput" placeholder="Write a message..."></textarea>
-    <button id="submitBtn" disabled>Submit</button>
-    <p id="feedbackMsg" style="color: green; display: none;">Message sent!</p>
+  <!-- Chat -->
+  <textarea id="messageInput" placeholder="Type your message..."></textarea>
+  <button id="sendMessage">Send</button>
+  <div id="messages"></div>
 
-    <!-- Message List -->
-    <h3>All Messages</h3>
-    <div id="feedbackList"></div>
+  <!-- Add Friend -->
+  <hr />
+  <input type="email" id="friendEmail" placeholder="Add friend by email" />
+  <button id="addFriendBtn">Add Friend</button>
+  <p id="friendMsg"></p>
+  <h3>Your Friends</h3>
+  <ul id="friendList"></ul>
 
-    <!-- Friend Feature -->
-    <hr />
-    <h3>Add a Friend</h3>
-    <input type="text" id="friendInput" placeholder="Enter username" />
-    <button onclick="addFriend()">Add Friend</button>
-    <p id="friendMsg" style="color: green; display: none;"></p>
+  <button id="logoutBtn">Logout</button>
 
-    <h3>Your Friends</h3>
-    <ul id="friendList"></ul>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    <!-- Logout -->
-    <button onclick="logout()" class="logout">Logout</button>
-  </div>
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      appId: "YOUR_APP_ID"
+    };
 
-  <script>
-    // Authentication check
-    const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-    if (!currentUser || !currentUser.username) {
-      window.location.href = "login.html";
-    }
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-    // UI References
-    const userDisplay = document.getElementById("userDisplay");
-    const input = document.getElementById("feedbackInput");
-    const button = document.getElementById("submitBtn");
-    const msg = document.getElementById("feedbackMsg");
-    const list = document.getElementById("feedbackList");
+    const messageInput = document.getElementById("messageInput");
+    const sendBtn = document.getElementById("sendMessage");
+    const messageBox = document.getElementById("messages");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const userEmailSpan = document.getElementById("userEmail");
 
-    const friendInput = document.getElementById("friendInput");
+    const friendInput = document.getElementById("friendEmail");
     const friendMsg = document.getElementById("friendMsg");
     const friendList = document.getElementById("friendList");
+    const addFriendBtn = document.getElementById("addFriendBtn");
 
-    userDisplay.textContent = currentUser.username;
+    let currentUser = null;
 
-    // Enable/disable button
-    input.addEventListener("input", () => {
-      button.disabled = input.value.trim() === "";
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUser = user;
+        userEmailSpan.textContent = user.email;
+        loadMessages();
+        loadFriends();
+      } else {
+        window.location.href = "login.html";
+      }
     });
 
-    // Submit message
-    function submitFeedback() {
-      const text = input.value.trim();
+    sendBtn.onclick = async () => {
+      const text = messageInput.value.trim();
       if (!text) return;
+      await addDoc(collection(db, "messages"), {
+        user: currentUser.email,
+        message: text,
+        timestamp: Date.now()
+      });
+      messageInput.value = "";
+      loadMessages();
+    };
 
-      let feedback = JSON.parse(localStorage.getItem("feedback") || "[]");
-      feedback.push({ username: currentUser.username, message: text });
-      localStorage.setItem("feedback", JSON.stringify(feedback));
-
-      input.value = "";
-      button.disabled = true;
-      msg.style.display = "block";
-      setTimeout(() => msg.style.display = "none", 2000);
-
-      displayFeedback();
+    async function loadMessages() {
+      const messages = await getDocs(collection(db, "messages"));
+      const sorted = [];
+      messages.forEach(doc => sorted.push(doc.data()));
+      sorted.sort((a, b) => b.timestamp - a.timestamp);
+      messageBox.innerHTML = sorted.map(m =>
+        `<div><strong>@${m.user}:</strong> ${m.message}</div>`
+      ).join("");
     }
 
-    // Show all messages
-    function displayFeedback() {
-      const feedback = JSON.parse(localStorage.getItem("feedback") || "[]");
-      if (feedback.length === 0) {
-        list.innerHTML = "<p>No messages yet.</p>";
+    logoutBtn.onclick = () => {
+      signOut(auth);
+    };
+
+    // Add Friend
+    addFriendBtn.onclick = async () => {
+      const email = friendInput.value.trim();
+      if (!email || email === currentUser.email) {
+        friendMsg.textContent = "Invalid friend email.";
         return;
       }
 
-      list.innerHTML = feedback
-        .slice()
-        .reverse()
-        .map(entry => `
-          <div class="feedback-item">
-            <strong>@${entry.username}</strong><br>${entry.message}
-          </div>
-        `)
-        .join("");
-    }
-
-    // Add friend logic
-    function addFriend() {
-      const friendName = friendInput.value.trim();
-      const username = currentUser.username;
-
-      const allUsers = JSON.parse(localStorage.getItem("users") || "{}");
-      const allFriends = JSON.parse(localStorage.getItem("friends") || "{}");
-
-      if (!friendName || friendName === username) {
-        showFriendMessage("Invalid username.", true);
+      const userDoc = await getDoc(doc(db, "users", email));
+      if (!userDoc.exists()) {
+        friendMsg.textContent = "User not found.";
         return;
       }
 
-      if (!allUsers[friendName]) {
-        showFriendMessage("User does not exist.", true);
-        return;
-      }
+      await setDoc(doc(db, "friends", currentUser.email), {
+        [email]: true
+      }, { merge: true });
 
-      if (!allFriends[username]) allFriends[username] = [];
-
-      if (allFriends[username].includes(friendName)) {
-        showFriendMessage("User already added.", true);
-        return;
-      }
-
-      allFriends[username].push(friendName);
-      localStorage.setItem("friends", JSON.stringify(allFriends));
-      showFriendMessage("Friend added!");
+      friendMsg.textContent = "Friend added!";
       friendInput.value = "";
-      displayFriends();
+      loadFriends();
+    };
+
+    async function loadFriends() {
+      const docRef = doc(db, "friends", currentUser.email);
+      const docSnap = await getDoc(docRef);
+      if (!docSnap.exists()) {
+        friendList.innerHTML = "<li>No friends yet.</li>";
+        return;
+      }
+      const data = docSnap.data();
+      friendList.innerHTML = Object.keys(data).map(email => `<li>${email}</li>`).join("");
     }
 
-    function displayFriends() {
-      const username = currentUser.username;
-      const allFriends = JSON.parse(localStorage.getItem("friends") || "{}");
-      const myFriends = allFriends[username] || [];
-
-      friendList.innerHTML = myFriends.length === 0
-        ? "<li>No friends yet.</li>"
-        : myFriends.map(name => `<li>${name}</li>`).join("");
-    }
-
-    function showFriendMessage(msgText, isError = false) {
-      friendMsg.textContent = msgText;
-      friendMsg.style.color = isError ? "red" : "green";
-      friendMsg.style.display = "block";
-      setTimeout(() => friendMsg.style.display = "none", 2000);
-    }
-
-    function logout() {
-      localStorage.removeItem("currentUser");
-      window.location.href = "login.html";
-    }
-
-    // Init
-    button.addEventListener("click", submitFeedback);
-    displayFeedback();
-    displayFriends();
+    // Store user in users collection (helpful for friend check)
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        await setDoc(doc(db, "users", user.email), {
+          email: user.email
+        }, { merge: true });
+      }
+    });
   </script>
 </body>
 </html>
