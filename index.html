@@ -9,57 +9,56 @@
   <div class="container">
     <h2>Welcome, <span id="userDisplay"></span>!</h2>
     <textarea id="feedbackInput" placeholder="Your feedback..."></textarea>
-    <button id="submitBtn" onclick="submitFeedback()">Submit</button>
+    <button id="submitBtn" disabled>Submit</button>
     <p id="feedbackMsg" style="color: green; display: none;">Feedback submitted!</p>
-    
+
     <h3>All Feedback</h3>
     <div id="feedbackList"></div>
     <button onclick="logout()" class="logout">Logout</button>
   </div>
 
   <script>
-    const user = JSON.parse(localStorage.getItem("currentUser"));
-    if (!user) {
-      window.location.href = "login.html";
-    } else {
-      document.getElementById("userDisplay").textContent = user.username;
-    }
-
+    const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+    const userDisplay = document.getElementById("userDisplay");
     const input = document.getElementById("feedbackInput");
     const button = document.getElementById("submitBtn");
     const msg = document.getElementById("feedbackMsg");
+    const list = document.getElementById("feedbackList");
 
-    // Enable/disable button based on input
+    // Redirect if not logged in
+    if (!currentUser || !currentUser.username) {
+      window.location.href = "login.html";
+    } else {
+      userDisplay.textContent = currentUser.username;
+    }
+
+    // Enable/disable button
     input.addEventListener("input", () => {
       button.disabled = input.value.trim() === "";
     });
-
-    button.disabled = true; // Initially disabled
 
     function submitFeedback() {
       const text = input.value.trim();
       if (!text) return;
 
-      let feedback = JSON.parse(localStorage.getItem("feedback") || "[]");
-      feedback.push({ username: user.username, message: text });
+      const feedback = JSON.parse(localStorage.getItem("feedback") || "[]");
+      feedback.push({
+        username: currentUser.username,
+        message: text
+      });
       localStorage.setItem("feedback", JSON.stringify(feedback));
 
       input.value = "";
       button.disabled = true;
 
-      // Show success message
       msg.style.display = "block";
-      setTimeout(() => {
-        msg.style.display = "none";
-      }, 2000);
+      setTimeout(() => msg.style.display = "none", 2000);
 
       displayFeedback();
     }
 
     function displayFeedback() {
       const feedback = JSON.parse(localStorage.getItem("feedback") || "[]");
-      const list = document.getElementById("feedbackList");
-
       list.innerHTML = feedback.map(entry => `
         <div class="feedback-item">
           <strong>@${entry.username}</strong><br>${entry.message}
@@ -72,6 +71,7 @@
       window.location.href = "login.html";
     }
 
+    button.addEventListener("click", submitFeedback);
     displayFeedback();
   </script>
 </body>
