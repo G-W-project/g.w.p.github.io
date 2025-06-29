@@ -1,4 +1,3 @@
-/* Hacker-style dark terminal theme with animation */
 body {
   background-color: #000;
   color: #33ff33;
@@ -16,7 +15,6 @@ body {
   text-align: center;
   padding: 20px;
   white-space: pre;
-  overflow: hidden;
   border-bottom: 1px solid #33ff33;
 }
 
@@ -39,7 +37,6 @@ body {
   border-radius: 5px;
   box-shadow: 0 0 10px #33ff33;
   animation: glow 2s infinite alternate;
-  display: none;
 }
 
 h2, h3 {
@@ -98,5 +95,3 @@ strong {
   from { box-shadow: 0 0 5px #33ff33; }
   to { box-shadow: 0 0 20px #33ff33; }
 }
-
-
