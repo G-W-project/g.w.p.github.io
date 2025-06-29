@@ -7,6 +7,9 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <div class="terminal-bg" aria-hidden="true">
+  <pre id="terminalText"></pre>
+</div>
   <!-- Boot animation screen -->
   <div class="terminal-startup" id="terminalStartup"></div>
 
@@ -189,6 +192,28 @@
     typeBoot();
     window.removeEventListener("click", trigger);
   });
+</script>
+<script>
+  const terminalText = document.getElementById("terminalText");
+  const lines = [
+    "Loading BIOS...",
+    "Initializing memory...",
+    "Checking device manager...",
+    "Starting neural shell...",
+    "Authenticating...",
+    "Link established.",
+    "Decrypting transmissions...",
+    "Bootloader initialized.",
+    "Running terminal diagnostics...",
+    "System secure."
+  ];
+
+  let text = "";
+  for (let i = 0; i < 200; i++) {
+    text += lines[Math.floor(Math.random() * lines.length)] + "\n";
+  }
+
+  terminalText.textContent = text;
 </script>
 </body>
 </html>
