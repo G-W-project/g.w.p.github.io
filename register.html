@@ -8,6 +8,7 @@
 <body>
   <div class="container">
     <h2>Register</h2>
+    <input type="text" id="username" placeholder="Username" />
     <input type="email" id="email" placeholder="Email" />
     <input type="password" id="password" placeholder="Password" />
     <button id="registerBtn">Register</button>
@@ -18,23 +19,36 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = { apiKey: "AIzaSyBiNKDXds9IWjFAwSbJaNN8Zd37Wujk5Kc", 
                              authDomain: "grid-walker-project.firebaseapp.com", 
                              projectId: "grid-walker-project", 
-                             appId: "grid walker project"
+                             appId: "grid walker project" 
                            };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+    const db = getFirestore(app);
 
     document.getElementById("registerBtn").onclick = async () => {
+      const username = document.getElementById("username").value.trim();
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
       const message = document.getElementById("message");
 
+      if (!username || !email || !password) {
+        message.textContent = "❌ Please fill all fields.";
+        return;
+      }
+
       try {
-        await createUserWithEmailAndPassword(auth, email, password);
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        await setDoc(doc(db, "users", email), {
+          email,
+          username
+        });
+
         message.textContent = "✅ Registered successfully!";
         window.location.href = "index.html";
       } catch (error) {
