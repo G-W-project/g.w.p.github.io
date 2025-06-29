@@ -6,6 +6,36 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const container = document.querySelector(".container");
+    const startup = document.createElement("div");
+    startup.className = "terminal-startup";
+    document.body.insertBefore(startup, container);
+
+    const text = "Booting Advice System...";
+    let i = 0;
+    const cursor = document.createElement("span");
+    cursor.className = "cursor";
+    cursor.textContent = "_";
+
+    function typeNext() {
+      if (i < text.length) {
+        startup.textContent += text[i];
+        i++;
+        setTimeout(typeNext, 75);
+      } else {
+        startup.appendChild(cursor);
+        setTimeout(() => {
+          startup.remove();
+          container.style.display = "block";
+        }, 1000);
+      }
+    }
+
+    typeNext();
+  });
+</script>
   <div class="terminal-startup">Booting Advice System<span class="cursor">_</span></div>
 <script>
   const startup = document.querySelector('.terminal-startup');
