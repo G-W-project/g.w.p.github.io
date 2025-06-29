@@ -121,15 +121,29 @@
     };
 
     async function loadFriends() {
-      const docRef = doc(db, "friends", currentUser.email);
-      const docSnap = await getDoc(docRef);
-      if (!docSnap.exists()) {
-        friendList.innerHTML = "<li>No friends yet.</li>";
-        return;
-      }
-      const data = docSnap.data();
-      friendList.innerHTML = Object.keys(data).map(email => `<li>${email}</li>`).join("");
-    }
+  const docRef = doc(db, "friends", currentUser.email);
+  const docSnap = await getDoc(docRef);
+
+  if (!docSnap.exists()) {
+    friendList.innerHTML = "<li>No friends yet.</li>";
+    return;
+  }
+
+  const friendEmails = Object.keys(docSnap.data());
+  if (friendEmails.length === 0) {
+    friendList.innerHTML = "<li>No friends yet.</li>";
+    return;
+  }
+
+  // Fetch each friend's username
+  const listItems = await Promise.all(friendEmails.map(async (email) => {
+    const userDoc = await getDoc(doc(db, "users", email));
+    const username = userDoc.exists() ? userDoc.data().username : email;
+    return `<li>@${username}</li>`;
+  }));
+
+  friendList.innerHTML = listItems.join("");
+}
   </script>
 </body>
 </html>
