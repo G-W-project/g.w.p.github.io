@@ -10,7 +10,7 @@
   <div class="terminal-startup" id="terminalStartup"></div>
 
   <!-- Hidden app container -->
-  <div class="container" style="display: none;">
+  <div class="container" id="appContainer" style="display: none;">
     <h2>Welcome, <span id="userName"></span>!</h2>
 
     <textarea id="adviceInput" placeholder="Enter your advice or concern..."></textarea>
@@ -156,24 +156,25 @@
 
   <!-- Boot animation script -->
   <script>
-    const bootText = "Booting Advice System...";
-    const startupDiv = document.getElementById("terminalStartup");
-    const container = document.querySelector(".container");
+  const bootText = "Booting Advice System...";
+  const startupDiv = document.getElementById("terminalStartup");
+  const appContainer = document.getElementById("appContainer");
 
-    let i = 0;
-    function typeBoot() {
-      if (i < bootText.length) {
-        startupDiv.innerHTML = bootText.slice(0, i + 1) + '<span class="cursor">_</span>';
-        i++;
-        setTimeout(typeBoot, 75);
-      } else {
-        setTimeout(() => {
-          startupDiv.remove();
-          container.style.display = "block";
-        }, 800);
-      }
+  let i = 0;
+  function typeBoot() {
+    if (i < bootText.length) {
+      startupDiv.innerHTML = bootText.slice(0, i + 1) + '<span class="cursor">_</span>';
+      i++;
+      setTimeout(typeBoot, 75);
+    } else {
+      setTimeout(() => {
+        startupDiv.style.display = "none";
+        appContainer.style.display = "block";
+      }, 800);
     }
-    window.addEventListener("DOMContentLoaded", typeBoot);
-  </script>
+  }
+
+  window.addEventListener("DOMContentLoaded", typeBoot);
+</script>
 </body>
 </html>
