@@ -6,23 +6,24 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h2>Login</h2>
-  <input type="email" id="email" placeholder="Email" />
-  <input type="password" id="password" placeholder="Password" />
-  <button id="loginBtn">Login</button>
-  <p id="message"></p>
-  <p>Don't have an account? <a href="register.html">Register</a></p>
+  <div class="container">
+    <h2>Login</h2>
+    <input type="email" id="email" placeholder="Email" />
+    <input type="password" id="password" placeholder="Password" />
+    <button id="loginBtn">Login</button>
+    <p id="message"></p>
+    <p>Don't have an account? <a href="register.html">Register</a></p>
+  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyBiNKDXds9IWjFAwSbJaNN8Zd37Wujk5Kc",
-      authDomain: "grid-walker-project.firebaseapp.com",
-      projectId: "grid-walker-project",
-      appId: "grid walker project"
-    };
+    const firebaseConfig = { apiKey: "AIzaSyBiNKDXds9IWjFAwSbJaNN8Zd37Wujk5Kc",
+                             authDomain: "grid-walker-project.firebaseapp.com", 
+                             projectId: "grid-walker-project", 
+                             appId: "grid walker project"
+                           };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
