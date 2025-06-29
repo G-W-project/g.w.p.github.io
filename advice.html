@@ -6,11 +6,11 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- Terminal Boot Typing Effect -->
+  <!-- Boot animation screen -->
   <div class="terminal-startup" id="terminalStartup"></div>
 
-  <!-- Hidden app container -->
-  <div class="container" id="appContainer" style="display: none;">
+  <!-- App container (initially hidden) -->
+  <div class="container hidden" id="appContainer">
     <h2>Welcome, <span id="userName"></span>!</h2>
 
     <textarea id="adviceInput" placeholder="Enter your advice or concern..."></textarea>
@@ -30,7 +30,7 @@
     <button id="logoutBtn">Logout</button>
   </div>
 
-  <!-- Firebase App -->
+  <!-- Firebase + Advice System Logic -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -154,27 +154,27 @@
     logoutBtn.onclick = () => signOut(auth);
   </script>
 
-  <!-- Boot animation script -->
+  <!-- Boot animation typing -->
   <script>
-  const bootText = "Booting Advice System...";
-  const startupDiv = document.getElementById("terminalStartup");
-  const appContainer = document.getElementById("appContainer");
+    const bootText = "Booting Advice System...";
+    const startupDiv = document.getElementById("terminalStartup");
+    const appContainer = document.getElementById("appContainer");
 
-  let i = 0;
-  function typeBoot() {
-    if (i < bootText.length) {
-      startupDiv.innerHTML = bootText.slice(0, i + 1) + '<span class="cursor">_</span>';
-      i++;
-      setTimeout(typeBoot, 75);
-    } else {
-      setTimeout(() => {
-        startupDiv.style.display = "none";
-        appContainer.style.display = "block";
-      }, 800);
+    let i = 0;
+    function typeBoot() {
+      if (i < bootText.length) {
+        startupDiv.innerHTML = bootText.slice(0, i + 1) + '<span class="cursor">_</span>';
+        i++;
+        setTimeout(typeBoot, 75);
+      } else {
+        setTimeout(() => {
+          startupDiv.remove();
+          appContainer.classList.remove("hidden"); // ✅ shows main app
+        }, 800);
+      }
     }
-  }
 
-  window.addEventListener("DOMContentLoaded", typeBoot);
-</script>
+    window.addEventListener("DOMContentLoaded", typeBoot);
+  </script>
 </body>
 </html>
