@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Redirecting...</title>
+  <meta http-equiv="refresh" content="0; url=advice.html" />
+  <script>
+    // JavaScript fallback for redirect
+    window.location.href = "advice.html";
+  </script>
+</head>
+<body>
+  <p>Redirecting to <a href="advice.html">advice.html</a>...</p>
+</body>
+</html>
