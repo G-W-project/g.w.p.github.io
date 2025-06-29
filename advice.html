@@ -157,16 +157,21 @@
 
   <!-- Boot animation typing -->
   <script>
-    const bootText = "Booting Advice System...";
-    const startupDiv = document.getElementById("terminalStartup");
-    const appContainer = document.getElementById("appContainer");
+  const bootText = "Booting Advice System...";
+  const startupDiv = document.getElementById("terminalStartup");
+  const appContainer = document.getElementById("appContainer");
+  const bootSound = document.getElementById("bootSound");
 
+  // Show "Click to boot..." with blinking cursor
+  startupDiv.innerHTML = "Click to boot<span class='cursor'>_</span>";
+
+  function typeBoot() {
     let i = 0;
-    function typeBoot() {
+    function next() {
       if (i < bootText.length) {
         startupDiv.innerHTML = bootText.slice(0, i + 1) + '<span class="cursor">_</span>';
         i++;
-        setTimeout(typeBoot, 75);
+        setTimeout(next, 75);
       } else {
         setTimeout(() => {
           startupDiv.remove();
@@ -174,12 +179,16 @@
         }, 800);
       }
     }
+    next();
+  }
 
-    window.addEventListener("click", function trigger() {
-  document.getElementById("bootSound").play().catch(() => {});
-  typeBoot();
-  window.removeEventListener("click", trigger);
-});
-  </script>
+  // Start boot on click
+  window.addEventListener("click", function trigger() {
+    bootSound.currentTime = 0;
+    bootSound.play().catch(() => {});
+    typeBoot();
+    window.removeEventListener("click", trigger);
+  });
+</script>
 </body>
 </html>
