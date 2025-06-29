@@ -4,13 +4,13 @@
   <meta charset="UTF-8" />
   <title>Advice System</title>
   <link rel="stylesheet" href="style.css" />
-  <audio id="bootSound" src="boot.mp3" preload="auto" loop></audio>
+  <audio id="bootSound" src="boot.mp3" preload="auto"></audio> <!-- Removed loop -->
 </head>
 <body>
-  <!-- Boot animation screen -->
+  <!-- Boot screen -->
   <div class="terminal-startup" id="terminalStartup">Click to boot<span class="cursor">_</span></div>
 
-  <!-- App container (initially hidden) -->
+  <!-- Advice App -->
   <div class="container hidden" id="appContainer">
     <h2>Welcome, <span id="userName"></span>!</h2>
 
@@ -31,7 +31,7 @@
     <button id="logoutBtn">Logout</button>
   </div>
 
-  <!-- Firebase + Advice System Logic -->
+  <!-- Firebase Logic -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -63,7 +63,7 @@
 
     let currentUser;
 
-    onAuthStateChanged(auth, async (user) => {
+    onAuthStateChanged(auth, (user) => {
       if (!user) return window.location.href = "login.html";
       currentUser = user;
       userNameSpan.textContent = user.email;
@@ -90,13 +90,12 @@
           timestamp: serverTimestamp()
         });
 
-        // Play sound again after submitting
         bootSound.currentTime = 0;
-        bootSound.play().catch(() => {});
+        bootSound.play().catch(() => {}); // replay sound once
 
         statusText.textContent = "✅ Advice submitted!";
         adviceInput.value = "";
-      } catch (e) {
+      } catch {
         statusText.textContent = "❌ Failed to submit.";
       }
     };
@@ -160,7 +159,7 @@
     logoutBtn.onclick = () => signOut(auth);
   </script>
 
-  <!-- Boot animation typing script -->
+  <!-- Boot animation -->
   <script>
     const startupDiv = document.getElementById("terminalStartup");
     const appContainer = document.getElementById("appContainer");
