@@ -2,68 +2,144 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Feedback Portal</title>
+  <title>Feedback & Chat Portal</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container">
     <h2>Welcome, <span id="userDisplay"></span>!</h2>
-    <textarea id="feedbackInput" placeholder="Your feedback..."></textarea>
-    <button id="submitBtn" disabled>Submit</button>
-    <p id="feedbackMsg" style="color: green; display: none;">Feedback submitted!</p>
 
-    <h3>All Feedback</h3>
+    <!-- Feedback/Chat Input -->
+    <textarea id="feedbackInput" placeholder="Write a message..."></textarea>
+    <button id="submitBtn" disabled>Submit</button>
+    <p id="feedbackMsg" style="color: green; display: none;">Message sent!</p>
+
+    <!-- Message List -->
+    <h3>All Messages</h3>
     <div id="feedbackList"></div>
+
+    <!-- Friend Feature -->
+    <hr />
+    <h3>Add a Friend</h3>
+    <input type="text" id="friendInput" placeholder="Enter username" />
+    <button onclick="addFriend()">Add Friend</button>
+    <p id="friendMsg" style="color: green; display: none;"></p>
+
+    <h3>Your Friends</h3>
+    <ul id="friendList"></ul>
+
+    <!-- Logout -->
     <button onclick="logout()" class="logout">Logout</button>
   </div>
 
   <script>
+    // Authentication check
     const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+    if (!currentUser || !currentUser.username) {
+      window.location.href = "login.html";
+    }
+
+    // UI References
     const userDisplay = document.getElementById("userDisplay");
     const input = document.getElementById("feedbackInput");
     const button = document.getElementById("submitBtn");
     const msg = document.getElementById("feedbackMsg");
     const list = document.getElementById("feedbackList");
 
-    // Redirect if not logged in
-    if (!currentUser || !currentUser.username) {
-      window.location.href = "login.html";
-    } else {
-      userDisplay.textContent = currentUser.username;
-    }
+    const friendInput = document.getElementById("friendInput");
+    const friendMsg = document.getElementById("friendMsg");
+    const friendList = document.getElementById("friendList");
+
+    userDisplay.textContent = currentUser.username;
 
     // Enable/disable button
     input.addEventListener("input", () => {
       button.disabled = input.value.trim() === "";
     });
 
+    // Submit message
     function submitFeedback() {
       const text = input.value.trim();
       if (!text) return;
 
-      const feedback = JSON.parse(localStorage.getItem("feedback") || "[]");
-      feedback.push({
-        username: currentUser.username,
-        message: text
-      });
+      let feedback = JSON.parse(localStorage.getItem("feedback") || "[]");
+      feedback.push({ username: currentUser.username, message: text });
       localStorage.setItem("feedback", JSON.stringify(feedback));
 
       input.value = "";
       button.disabled = true;
-
       msg.style.display = "block";
       setTimeout(() => msg.style.display = "none", 2000);
 
       displayFeedback();
     }
 
+    // Show all messages
     function displayFeedback() {
       const feedback = JSON.parse(localStorage.getItem("feedback") || "[]");
-      list.innerHTML = feedback.map(entry => `
-        <div class="feedback-item">
-          <strong>@${entry.username}</strong><br>${entry.message}
-        </div>
-      `).reverse().join("");
+      if (feedback.length === 0) {
+        list.innerHTML = "<p>No messages yet.</p>";
+        return;
+      }
+
+      list.innerHTML = feedback
+        .slice()
+        .reverse()
+        .map(entry => `
+          <div class="feedback-item">
+            <strong>@${entry.username}</strong><br>${entry.message}
+          </div>
+        `)
+        .join("");
+    }
+
+    // Add friend logic
+    function addFriend() {
+      const friendName = friendInput.value.trim();
+      const username = currentUser.username;
+
+      const allUsers = JSON.parse(localStorage.getItem("users") || "{}");
+      const allFriends = JSON.parse(localStorage.getItem("friends") || "{}");
+
+      if (!friendName || friendName === username) {
+        showFriendMessage("Invalid username.", true);
+        return;
+      }
+
+      if (!allUsers[friendName]) {
+        showFriendMessage("User does not exist.", true);
+        return;
+      }
+
+      if (!allFriends[username]) allFriends[username] = [];
+
+      if (allFriends[username].includes(friendName)) {
+        showFriendMessage("User already added.", true);
+        return;
+      }
+
+      allFriends[username].push(friendName);
+      localStorage.setItem("friends", JSON.stringify(allFriends));
+      showFriendMessage("Friend added!");
+      friendInput.value = "";
+      displayFriends();
+    }
+
+    function displayFriends() {
+      const username = currentUser.username;
+      const allFriends = JSON.parse(localStorage.getItem("friends") || "{}");
+      const myFriends = allFriends[username] || [];
+
+      friendList.innerHTML = myFriends.length === 0
+        ? "<li>No friends yet.</li>"
+        : myFriends.map(name => `<li>${name}</li>`).join("");
+    }
+
+    function showFriendMessage(msgText, isError = false) {
+      friendMsg.textContent = msgText;
+      friendMsg.style.color = isError ? "red" : "green";
+      friendMsg.style.display = "block";
+      setTimeout(() => friendMsg.style.display = "none", 2000);
     }
 
     function logout() {
@@ -71,8 +147,10 @@
       window.location.href = "login.html";
     }
 
+    // Init
     button.addEventListener("click", submitFeedback);
     displayFeedback();
+    displayFriends();
   </script>
 </body>
 </html>
