@@ -1,36 +1,44 @@
-<!-- register.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>Register</title>
-  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="container">
-    <h2>Register</h2>
-    <input type="text" id="username" placeholder="Username" />
-    <input type="password" id="password" placeholder="Password" />
-    <button onclick="register()">Create Account</button>
-    <p>Already have an account? <a href="login.html">Login</a></p>
-  </div>
+  <h2>Register</h2>
+  <input type="email" id="email" placeholder="Email" />
+  <input type="password" id="password" placeholder="Password" />
+  <button id="registerBtn">Register</button>
+  <p id="message"></p>
+  <p>Already have an account? <a href="login.html">Login</a></p>
 
-  <script>
-    function register() {
-      const username = document.getElementById("username").value.trim();
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    document.getElementById("registerBtn").onclick = async () => {
+      const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
+      const message = document.getElementById("message");
 
-      const users = JSON.parse(localStorage.getItem("users") || "{}");
-      if (users[username]) {
-        alert("Username already exists.");
-        return;
+      try {
+        await createUserWithEmailAndPassword(auth, email, password);
+        message.textContent = "✅ Registered successfully!";
+        window.location.href = "index.html";
+      } catch (error) {
+        message.textContent = "❌ " + error.message;
       }
-
-      users[username] = password;
-      localStorage.setItem("users", JSON.stringify(users));
-      alert("Account created. You can now log in.");
-      window.location.href = "login.html";
-    }
+    };
   </script>
 </body>
 </html>
