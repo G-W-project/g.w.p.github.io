@@ -101,3 +101,35 @@ strong {
   from { box-shadow: 0 0 5px #33ff33; }
   to { box-shadow: 0 0 20px #33ff33; }
 }
+
+body::before {
+  content: "Running diagnostic...\AChecking memory banks...\AScanning firmware...\ACompiling neural routine...\ABootloader: OK";
+  white-space: pre;
+  font-family: "Courier New", Courier, monospace;
+  color: rgba(51, 255, 51, 0.08);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 1px,
+    rgba(51, 255, 51, 0.03) 2px
+  );
+  animation: scrollText 12s linear infinite;
+}
+
+@keyframes scrollText {
+  from { background-position-y: 0; }
+  to { background-position-y: 100%; }
+}
+
+.container,
+.terminal-startup {
+  position: relative;
+  z-index: 1;
+}

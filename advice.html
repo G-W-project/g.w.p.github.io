@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Advice System</title>
+  <audio id="bootSound" src="https://cdn.pixabay.com/audio/2022/08/04/audio_dcf85d90ca.mp3" preload="auto"></audio>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -174,7 +175,10 @@
       }
     }
 
-    window.addEventListener("DOMContentLoaded", typeBoot);
+    window.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("bootSound").play().catch(() => {});
+  typeBoot();
+});
   </script>
 </body>
 </html>
