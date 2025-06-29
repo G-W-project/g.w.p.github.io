@@ -1,64 +1,15 @@
-/* Terminal-style dark green theme */
-body {
-  background-color: #000;
-  color: #33ff33;
-  font-family: "Courier New", Courier, monospace;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  margin: 0;
-  overflow: hidden;
-  animation: flicker 1s infinite alternate;
-}
-
-.center-screen {
-  text-align: center;
-  padding: 30px;
-  border: 1px solid #33ff33;
-  border-radius: 5px;
-  box-shadow: 0 0 10px #33ff33;
-  background-color: #111;
-  animation: glow 2s infinite alternate;
-}
-
-h1 {
-  font-size: 32px;
-  margin-bottom: 10px;
-  color: #00ff00;
-  animation: flicker 1.5s infinite alternate;
-}
-
-.subtext {
-  font-size: 16px;
-  color: #33ff33;
-  margin-bottom: 30px;
-}
-
-.btn {
-  display: inline-block;
-  padding: 12px 24px;
-  color: #33ff33;
-  background-color: #000;
-  border: 1px solid #33ff33;
-  border-radius: 5px;
-  text-decoration: none;
-  font-weight: bold;
-  box-shadow: 0 0 5px #33ff33;
-  transition: background 0.3s;
-}
-
-.btn:hover {
-  background-color: #002200;
-  cursor: pointer;
-}
-
-@keyframes flicker {
-  from { opacity: 1; }
-  to { opacity: 0.85; }
-}
-
-@keyframes glow {
-  from { box-shadow: 0 0 5px #33ff33; }
-  to { box-shadow: 0 0 20px #33ff33; }
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>G.W.P System</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="center-screen">
+    <h1>Welcome to G.W.P System</h1>
+    <p class="subtext">Secure AI Terminal Interface</p>
+    <a href="advice.html" class="btn">Access Advice System</a>
+  </div>
+</body>
+</html>
