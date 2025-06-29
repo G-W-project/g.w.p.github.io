@@ -6,16 +6,18 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <!-- Terminal Boot Typing Effect -->
   <div class="terminal-startup" id="terminalStartup"></div>
 
-  <div class="container">
+  <!-- Hidden app container -->
+  <div class="container" style="display: none;">
     <h2>Welcome, <span id="userName"></span>!</h2>
 
     <textarea id="adviceInput" placeholder="Enter your advice or concern..."></textarea>
     <button id="submitAdvice">Submit Advice</button>
     <p id="status"></p>
 
-    <div id="adminPanel" style="display:none;">
+    <div id="adminPanel" style="display: none;">
       <h3>All Conversations</h3>
       <div id="adminAdviceList"></div>
     </div>
@@ -28,6 +30,7 @@
     <button id="logoutBtn">Logout</button>
   </div>
 
+  <!-- Firebase App -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -151,12 +154,11 @@
     logoutBtn.onclick = () => signOut(auth);
   </script>
 
+  <!-- Boot animation script -->
   <script>
     const bootText = "Booting Advice System...";
     const startupDiv = document.getElementById("terminalStartup");
     const container = document.querySelector(".container");
-
-    container.style.display = "none";
 
     let i = 0;
     function typeBoot() {
@@ -168,10 +170,10 @@
         setTimeout(() => {
           startupDiv.remove();
           container.style.display = "block";
-        }, 1000);
+        }, 800);
       }
     }
-    typeBoot();
+    window.addEventListener("DOMContentLoaded", typeBoot);
   </script>
 </body>
 </html>
