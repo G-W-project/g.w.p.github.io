@@ -45,7 +45,7 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    const adminEmail = "wuhung0501@gmail.com"; // Replace with your admin email
+    const adminEmail = "admin@example.com"; // replace with your actual admin email
 
     const userNameSpan = document.getElementById("userName");
     const adviceInput = document.getElementById("adviceInput");
@@ -70,6 +70,8 @@
         userPanel.style.display = "none";
         loadAllAdvice();
       } else {
+        adminPanel.style.display = "none";
+        userPanel.style.display = "block";
         loadUserAdvice();
       }
     });
@@ -92,7 +94,7 @@
         });
         statusText.textContent = "✅ Advice submitted!";
         adviceInput.value = "";
-        if (currentUser.email !== adminEmail) loadUserAdvice();
+        loadUserAdvice();
       } catch (e) {
         statusText.textContent = "❌ Failed to submit.";
       }
@@ -108,7 +110,7 @@
         const div = document.createElement("div");
         div.classList.add("feedback-item");
 
-        const messages = data.thread.map(m => `<p><strong>${m.sender}:</strong> ${m.message}</p>`).join("");
+        const messages = (data.thread || []).map(m => `<p><strong>${m.sender}:</strong> ${m.message}</p>`).join("");
 
         div.innerHTML = `
           <strong>${data.userEmail}</strong><br>
@@ -126,7 +128,7 @@
             message: replyInput.value.trim(),
             timestamp: new Date().toISOString()
           };
-          const updatedThread = [...data.thread, newReply];
+          const updatedThread = [...(data.thread || []), newReply];
           await updateDoc(doc(db, "advices", docSnap.id), { thread: updatedThread });
           loadAllAdvice();
         };
@@ -145,7 +147,7 @@
         const div = document.createElement("div");
         div.classList.add("feedback-item");
 
-        const messages = data.thread.map(m => `<p><strong>${m.sender}:</strong> ${m.message}</p>`).join("");
+        const messages = (data.thread || []).map(m => `<p><strong>${m.sender}:</strong> ${m.message}</p>`).join("");
 
         div.innerHTML = `
           ${messages}
@@ -162,7 +164,7 @@
             message: replyInput.value.trim(),
             timestamp: new Date().toISOString()
           };
-          const updatedThread = [...data.thread, newReply];
+          const updatedThread = [...(data.thread || []), newReply];
           await updateDoc(doc(db, "advices", docSnap.id), { thread: updatedThread });
           loadUserAdvice();
         };
