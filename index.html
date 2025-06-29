@@ -9,6 +9,11 @@
   <div class="container">
     <h2>Welcome, <span id="userName"></span>!</h2>
 
+    <!-- Profile Image -->
+    <img id="profileImage" src="" alt="Profile Image" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover;" />
+    <input type="file" id="profileInput" accept="image/*" />
+    <button id="uploadBtn">Change Photo</button>
+
     <!-- Chat -->
     <textarea id="messageInput" placeholder="Type your message..."></textarea>
     <button id="sendMessage">Send</button>
@@ -29,16 +34,19 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { getFirestore, collection, addDoc, getDocs, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-    const firebaseConfig = { apiKey: "AIzaSyBiNKDXds9IWjFAwSbJaNN8Zd37Wujk5Kc",
-                             authDomain: "grid-walker-project.firebaseapp.com", 
-                             projectId: "grid-walker-project", 
-                             appId: "grid walker project" 
-                           };
+    const firebaseConfig = {
+      apiKey: "AIzaSyBiNKDXds9IWjFAwSbJaNN8Zd37Wujk5Kc",
+      authDomain: "grid-walker-project.firebaseapp.com",
+      projectId: "grid-walker-project",
+      appId: "grid walker project"
+    };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
+    const storage = getStorage(app);
 
     let currentUser = null;
     let currentUsername = "";
@@ -48,7 +56,9 @@
     const sendBtn = document.getElementById("sendMessage");
     const messageBox = document.getElementById("messages");
     const logoutBtn = document.getElementById("logoutBtn");
-
+    const profileImage = document.getElementById("profileImage");
+    const profileInput = document.getElementById("profileInput");
+    const uploadBtn = document.getElementById("uploadBtn");
     const friendInput = document.getElementById("friendEmail");
     const friendMsg = document.getElementById("friendMsg");
     const friendList = document.getElementById("friendList");
@@ -61,25 +71,52 @@
       }
 
       currentUser = user;
-      const userDoc = await getDoc(doc(db, "users", user.email));
-      currentUsername = userDoc.exists() ? userDoc.data().username : user.email;
-      userNameEl.textContent = currentUsername;
+      const userDocRef = doc(db, "users", user.email);
+      const userDocSnap = await getDoc(userDocRef);
+
+      if (userDocSnap.exists()) {
+        const data = userDocSnap.data();
+        currentUsername = data.username || user.email;
+        userNameEl.textContent = currentUsername;
+        if (data.photoURL) {
+          profileImage.src = data.photoURL;
+        } else {
+          profileImage.src = "https://via.placeholder.com/100?text=No+Photo";
+        }
+      } else {
+        profileImage.src = "https://via.placeholder.com/100?text=No+Photo";
+        userNameEl.textContent = user.email;
+      }
 
       loadMessages();
       loadFriends();
     });
 
+    uploadBtn.onclick = async () => {
+      const file = profileInput.files[0];
+      if (!file) return alert("Select an image.");
+
+      const storageRef = ref(storage, `profile_pics/${currentUser.email}`);
+      await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(storageRef);
+
+      await setDoc(doc(db, "users", currentUser.email), {
+        photoURL: downloadURL
+      }, { merge: true });
+
+      profileImage.src = downloadURL;
+      alert("✅ Photo updated!");
+    };
+
     sendBtn.onclick = async () => {
       const text = messageInput.value.trim();
       if (!text) return;
-
       await addDoc(collection(db, "messages"), {
         user: currentUser.email,
         username: currentUsername,
         message: text,
         timestamp: Date.now()
       });
-
       messageInput.value = "";
       loadMessages();
     };
@@ -94,56 +131,59 @@
       ).join("");
     }
 
-    logoutBtn.onclick = () => {
-      signOut(auth);
-    };
+    logoutBtn.onclick = () => signOut(auth);
 
     addFriendBtn.onclick = async () => {
-      const email = friendInput.value.trim();
-      if (!email || email === currentUser.email) {
-        friendMsg.textContent = "Invalid friend email.";
+      const friendEmail = friendInput.value.trim().toLowerCase();
+      if (!friendEmail || friendEmail === currentUser.email) {
+        friendMsg.textContent = "❌ Invalid email.";
         return;
       }
 
-      const userDoc = await getDoc(doc(db, "users", email));
+      const userDoc = await getDoc(doc(db, "users", friendEmail));
       if (!userDoc.exists()) {
-        friendMsg.textContent = "User not found.";
+        friendMsg.textContent = "❌ User not found.";
         return;
       }
 
-      await setDoc(doc(db, "friends", currentUser.email), {
-        [email]: true
-      }, { merge: true });
+      const myFriendListRef = doc(db, "friends", currentUser.email);
+      const existing = await getDoc(myFriendListRef);
+      const friendData = existing.exists() ? existing.data() : {};
 
-      friendMsg.textContent = "Friend added!";
+      if (friendData[friendEmail]) {
+        friendMsg.textContent = "⚠️ Already added.";
+        return;
+      }
+
+      await setDoc(myFriendListRef, {
+        ...friendData,
+        [friendEmail]: true
+      });
+
+      friendMsg.textContent = "✅ Friend added!";
       friendInput.value = "";
       loadFriends();
     };
 
     async function loadFriends() {
-  const docRef = doc(db, "friends", currentUser.email);
-  const docSnap = await getDoc(docRef);
+      const docRef = doc(db, "friends", currentUser.email);
+      const docSnap = await getDoc(docRef);
+      if (!docSnap.exists()) {
+        friendList.innerHTML = "<li>No friends yet.</li>";
+        return;
+      }
 
-  if (!docSnap.exists()) {
-    friendList.innerHTML = "<li>No friends yet.</li>";
-    return;
-  }
+      const friendEmails = Object.keys(docSnap.data());
+      const listItems = await Promise.all(friendEmails.map(async (email) => {
+        const userDoc = await getDoc(doc(db, "users", email));
+        const data = userDoc.data();
+        const username = data?.username || email;
+        const photoURL = data?.photoURL || "https://via.placeholder.com/50?text=No+Pic";
+        return `<li><img src="${photoURL}" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-right: 8px;" /> @${username}</li>`;
+      }));
 
-  const friendEmails = Object.keys(docSnap.data());
-  if (friendEmails.length === 0) {
-    friendList.innerHTML = "<li>No friends yet.</li>";
-    return;
-  }
-
-  // Fetch each friend's username
-  const listItems = await Promise.all(friendEmails.map(async (email) => {
-    const userDoc = await getDoc(doc(db, "users", email));
-    const username = userDoc.exists() ? userDoc.data().username : email;
-    return `<li>${username}</li>`;
-  }));
-
-  friendList.innerHTML = listItems.join("");
-}
+      friendList.innerHTML = listItems.join("");
+    }
   </script>
 </body>
 </html>
