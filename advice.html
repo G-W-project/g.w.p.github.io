@@ -16,13 +16,13 @@
 
     <!-- Admin View -->
     <div id="adminPanel" style="display:none;">
-      <h3>All User Conversations</h3>
+      <h3>All Conversations</h3>
       <div id="adminAdviceList"></div>
     </div>
 
     <!-- User View -->
     <div id="userPanel">
-      <h3>Your Conversations</h3>
+      <h3>Your Conversation</h3>
       <div id="userAdviceList"></div>
     </div>
 
@@ -32,7 +32,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, setDoc, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBiNKDXds9IWjFAwSbJaNN8Zd37Wujk5Kc",
@@ -45,7 +45,7 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    const adminEmail = "admin@example.com"; // Update to your real admin email
+    const adminEmail = "admin@example.com"; // Replace with your admin email
 
     const userNameSpan = document.getElementById("userName");
     const adviceInput = document.getElementById("adviceInput");
@@ -123,7 +123,7 @@
         replyBtn.onclick = async () => {
           const newReply = {
             sender: "admin",
-            message: replyInput.value,
+            message: replyInput.value.trim(),
             timestamp: new Date().toISOString()
           };
           const updatedThread = [...data.thread, newReply];
@@ -159,7 +159,7 @@
         replyBtn.onclick = async () => {
           const newReply = {
             sender: "user",
-            message: replyInput.value,
+            message: replyInput.value.trim(),
             timestamp: new Date().toISOString()
           };
           const updatedThread = [...data.thread, newReply];
