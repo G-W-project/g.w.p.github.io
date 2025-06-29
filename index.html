@@ -139,7 +139,7 @@
   const listItems = await Promise.all(friendEmails.map(async (email) => {
     const userDoc = await getDoc(doc(db, "users", email));
     const username = userDoc.exists() ? userDoc.data().username : email;
-    return `<li>@${username}</li>`;
+    return `<li>${username}</li>`;
   }));
 
   friendList.innerHTML = listItems.join("");
