@@ -1,141 +1,58 @@
-/* Hacker-style dark terminal theme with animations */
+/* Terminal-style dark green theme */
 body {
   background-color: #000;
   color: #33ff33;
   font-family: "Courier New", Courier, monospace;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
   margin: 0;
-  padding: 0;
+  overflow: hidden;
   animation: flicker 1s infinite alternate;
 }
-.terminal-bg {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 0.5;
-  width: 100%;
-  height: 100%;
-  overflow: show;
-  padding: 20px;
-  background: black;
-  color: #33ff33;
-  font-family: "Courier New", Courier, monospace;
-  opacity: 0.05;
-  pointer-events: none;
-  user-select: none;
-  white-space: pre-wrap;
-}
 
-#terminalText {
-  animation: scrollUp 60s linear infinite;
-}
-
-@keyframes scrollUp {
-  0% {
-    transform: translateY(100%);
-  }
-  100% {
-    transform: translateY(-100%);
-  }
-}
-/* Hide content until boot completes */
-.hidden {
-  display: none !important;
-}
-
-/* Boot screen */
-.terminal-startup {
-  color: #33ff33;
-  font-family: "Courier New", Courier, monospace;
-  font-size: 18px;
-  background: black;
+.center-screen {
   text-align: center;
-  padding: 20px;
-  white-space: pre;
-  border-bottom: 1px solid #33ff33;
-  position: relative;
-  z-index: 1;
-}
-
-/* Blinking cursor */
-.cursor {
-  display: inline-block;
-  animation: blink 1s step-start infinite;
-}
-
-@keyframes blink {
-  0%, 50% { opacity: 1; }
-  51%, 100% { opacity: 0; }
-}
-
-/* Main app container */
-.container {
-  max-width: 800px;
-  margin: 50px auto;
-  background-color: #111;
-  padding: 20px;
+  padding: 30px;
   border: 1px solid #33ff33;
   border-radius: 5px;
   box-shadow: 0 0 10px #33ff33;
+  background-color: #111;
   animation: glow 2s infinite alternate;
-  position: relative;
-  z-index: 1;
 }
 
-/* Headers */
-h2, h3 {
+h1 {
+  font-size: 32px;
+  margin-bottom: 10px;
   color: #00ff00;
-  text-align: center;
   animation: flicker 1.5s infinite alternate;
 }
 
-/* Inputs, buttons, textareas */
-input, textarea, button {
-  display: block;
-  width: 100%;
-  margin: 10px 0;
-  padding: 10px;
-  background-color: #000;
+.subtext {
+  font-size: 16px;
   color: #33ff33;
-  border: 1px solid #33ff33;
-  border-radius: 3px;
-  font-family: "Courier New", Courier, monospace;
-  box-shadow: 0 0 5px #33ff33;
+  margin-bottom: 30px;
 }
 
-button:hover {
+.btn {
+  display: inline-block;
+  padding: 12px 24px;
+  color: #33ff33;
+  background-color: #000;
+  border: 1px solid #33ff33;
+  border-radius: 5px;
+  text-decoration: none;
+  font-weight: bold;
+  box-shadow: 0 0 5px #33ff33;
+  transition: background 0.3s;
+}
+
+.btn:hover {
   background-color: #002200;
   cursor: pointer;
 }
 
-/* Advice thread display */
-.feedback-item {
-  margin-bottom: 20px;
-  padding: 15px;
-  border: 1px solid #33ff33;
-  border-radius: 3px;
-  background-color: #111;
-  animation: flicker 2s infinite alternate;
-}
-
-/* Placeholder text */
-textarea::placeholder,
-input::placeholder {
-  color: #33ff33;
-  opacity: 0.5;
-}
-
-/* Message paragraphs */
-p {
-  margin: 5px 0;
-  color: #33ff33;
-}
-
-/* Labels */
-strong {
-  color: #00ff00;
-}
-
-/* Glow and flicker animations */
 @keyframes flicker {
   from { opacity: 1; }
   to { opacity: 0.85; }
@@ -144,40 +61,4 @@ strong {
 @keyframes glow {
   from { box-shadow: 0 0 5px #33ff33; }
   to { box-shadow: 0 0 20px #33ff33; }
-}
-
-/* Terminal-style scrolling command text background */
-body::before {
-  content: "Initializing kernel...\\AAllocating memory...\\AStarting system services...\\AAuthenticating users...\\ADecrypting advice database...\\ALoading UI modules...";
-  white-space: pre-wrap;
-  font-family: "Courier New", Courier, monospace;
-  color: rgba(51, 255, 51, 0.06);
-  font-size: 20px;
-  line-height: 1.5;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-  pointer-events: none;
-  animation: scrollText 20s linear infinite;
-  overflow: hidden;
-  padding: 50px;
-}
-
-@keyframes scrollText {
-  0% {
-    transform: translateY(100%);
-  }
-  100% {
-    transform: translateY(-100%);
-  }
-}
-
-/* Ensure main app stays on top of background */
-.container,
-.terminal-startup {
-  position: relative;
-  z-index: 1;
 }
