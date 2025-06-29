@@ -4,34 +4,25 @@
   <meta charset="UTF-8" />
   <title>Advice System</title>
   <link rel="stylesheet" href="style.css" />
-  <audio id="bootSound" src="boot.mp3" preload="auto"></audio> <!-- Removed loop -->
+  <audio id="bootSound" src="boot.mp3" preload="auto"></audio>
 </head>
 <body>
-  <!-- Boot screen -->
   <div class="terminal-startup" id="terminalStartup">Click to boot<span class="cursor">_</span></div>
-
-  <!-- Advice App -->
   <div class="container hidden" id="appContainer">
     <h2>Welcome, <span id="userName"></span>!</h2>
-
     <textarea id="adviceInput" placeholder="Enter your advice or concern..."></textarea>
     <button id="submitAdvice">Submit Advice</button>
     <p id="status"></p>
-
     <div id="adminPanel" style="display: none;">
       <h3>All Conversations</h3>
       <div id="adminAdviceList"></div>
     </div>
-
     <div id="userPanel">
       <h3>Your Conversation</h3>
       <div id="userAdviceList"></div>
     </div>
-
     <button id="logoutBtn">Logout</button>
   </div>
-
-  <!-- Firebase Logic -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -89,10 +80,8 @@
           thread: [{ sender: "user", message, timestamp: new Date().toISOString() }],
           timestamp: serverTimestamp()
         });
-
         bootSound.currentTime = 0;
-        bootSound.play().catch(() => {}); // replay sound once
-
+        bootSound.play().catch(() => {});
         statusText.textContent = "✅ Advice submitted!";
         adviceInput.value = "";
       } catch {
@@ -159,7 +148,6 @@
     logoutBtn.onclick = () => signOut(auth);
   </script>
 
-  <!-- Boot animation -->
   <script>
     const startupDiv = document.getElementById("terminalStartup");
     const appContainer = document.getElementById("appContainer");
