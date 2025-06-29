@@ -4,12 +4,67 @@
   <meta charset="UTF-8" />
   <title>G.W.P System</title>
   <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      background-color: #000;
+      color: #33ff33;
+      font-family: "Courier New", Courier, monospace;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .center-screen {
+      text-align: center;
+      border: 1px solid #33ff33;
+      padding: 30px;
+      border-radius: 5px;
+      background-color: #111;
+      box-shadow: 0 0 10px #33ff33;
+    }
+
+    .typewriter {
+      font-size: 18px;
+      white-space: pre;
+    }
+
+    .cursor {
+      display: inline-block;
+      animation: blink 1s step-start infinite;
+    }
+
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+  </style>
 </head>
 <body>
   <div class="center-screen">
-    <h1>Welcome to G.W.P System</h1>
-    <p class="subtext">Secure AI Terminal Interface</p>
-    <a href="advice.html" class="btn">Access Advice System</a>
+    <div class="typewriter" id="bootMessage"></div>
   </div>
+
+  <script>
+    const bootText = "Welcome to G.W.P System...\nRedirecting to advice system...";
+    const el = document.getElementById("bootMessage");
+    let i = 0;
+
+    function type() {
+      if (i < bootText.length) {
+        el.innerHTML = bootText.slice(0, i + 1) + '<span class="cursor">_</span>';
+        i++;
+        setTimeout(type, 50);
+      } else {
+        setTimeout(() => {
+          window.location.href = "advice.html";
+        }, 1500); // Wait 1.5s after typing
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", type);
+  </script>
 </body>
 </html>
