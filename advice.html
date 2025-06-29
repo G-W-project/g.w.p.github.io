@@ -32,7 +32,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBiNKDXds9IWjFAwSbJaNN8Zd37Wujk5Kc",
@@ -45,7 +45,7 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    const adminEmail = "wuhung0501@gmail.com"; // replace with your actual admin email
+    const adminEmail = "admin@example.com"; // replace with your actual admin email
 
     const userNameSpan = document.getElementById("userName");
     const adviceInput = document.getElementById("adviceInput");
@@ -116,10 +116,12 @@
           <strong>${data.userEmail}</strong><br>
           ${messages}
           <textarea placeholder="Reply..."></textarea>
-          <button>Send Reply</button>
+          <button class="reply">Send Reply</button>
+          <button class="delete" style="margin-left: 10px;">Delete Advice</button>
         `;
 
-        const replyBtn = div.querySelector("button");
+        const replyBtn = div.querySelector(".reply");
+        const deleteBtn = div.querySelector(".delete");
         const replyInput = div.querySelector("textarea");
 
         replyBtn.onclick = async () => {
@@ -131,6 +133,13 @@
           const updatedThread = [...(data.thread || []), newReply];
           await updateDoc(doc(db, "advices", docSnap.id), { thread: updatedThread });
           loadAllAdvice();
+        };
+
+        deleteBtn.onclick = async () => {
+          if (confirm("Are you sure you want to delete this advice?")) {
+            await deleteDoc(doc(db, "advices", docSnap.id));
+            loadAllAdvice();
+          }
         };
 
         adminAdviceList.appendChild(div);
