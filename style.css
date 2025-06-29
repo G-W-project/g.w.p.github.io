@@ -120,9 +120,11 @@ strong {
 /* Terminal-style scrolling command text background */
 body::before {
   content: "Initializing kernel...\\AAllocating memory...\\AStarting system services...\\AAuthenticating users...\\ADecrypting advice database...\\ALoading UI modules...";
-  white-space: pre;
+  white-space: pre-wrap;
   font-family: "Courier New", Courier, monospace;
   color: rgba(51, 255, 51, 0.06);
+  font-size: 14px;
+  line-height: 1.5;
   position: fixed;
   top: 0;
   left: 0;
@@ -130,21 +132,23 @@ body::before {
   height: 100%;
   z-index: 0;
   pointer-events: none;
-  animation: scrollText 30s linear infinite;
-  line-height: 1.5;
-  background: repeating-linear-gradient(
-    to bottom,
-    transparent 0px,
-    transparent 2px,
-    rgba(51, 255, 51, 0.015) 4px
-  );
+  animation: scrollText 20s linear infinite;
+  overflow: hidden;
+  padding: 50px;
 }
 
 @keyframes scrollText {
   0% {
-    transform: translateY(0);
+    transform: translateY(100%);
   }
   100% {
     transform: translateY(-100%);
   }
+}
+
+/* Ensure main app stays on top of background */
+.container,
+.terminal-startup {
+  position: relative;
+  z-index: 1;
 }
