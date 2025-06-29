@@ -9,7 +9,9 @@
   <div class="container">
     <h2>Welcome, <span id="userDisplay"></span>!</h2>
     <textarea id="feedbackInput" placeholder="Your feedback..."></textarea>
-    <button onclick="submitFeedback()">Submit</button>
+    <button id="submitBtn" onclick="submitFeedback()">Submit</button>
+    <p id="feedbackMsg" style="color: green; display: none;">Feedback submitted!</p>
+    
     <h3>All Feedback</h3>
     <div id="feedbackList"></div>
     <button onclick="logout()" class="logout">Logout</button>
@@ -23,8 +25,18 @@
       document.getElementById("userDisplay").textContent = user.username;
     }
 
+    const input = document.getElementById("feedbackInput");
+    const button = document.getElementById("submitBtn");
+    const msg = document.getElementById("feedbackMsg");
+
+    // Enable/disable button based on input
+    input.addEventListener("input", () => {
+      button.disabled = input.value.trim() === "";
+    });
+
+    button.disabled = true; // Initially disabled
+
     function submitFeedback() {
-      const input = document.getElementById("feedbackInput");
       const text = input.value.trim();
       if (!text) return;
 
@@ -33,6 +45,14 @@
       localStorage.setItem("feedback", JSON.stringify(feedback));
 
       input.value = "";
+      button.disabled = true;
+
+      // Show success message
+      msg.style.display = "block";
+      setTimeout(() => {
+        msg.style.display = "none";
+      }, 2000);
+
       displayFeedback();
     }
 
@@ -44,7 +64,7 @@
         <div class="feedback-item">
           <strong>@${entry.username}</strong><br>${entry.message}
         </div>
-      `).reverse().join(""); // Show newest first
+      `).reverse().join("");
     }
 
     function logout() {
