@@ -3,15 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <title>Advice System</title>
-  <audio id="bootSound" src="boot.mp3" preload="loop"></audio>
   <link rel="stylesheet" href="style.css" />
+  <audio id="bootSound" src="boot.mp3" preload="auto" loop></audio>
 </head>
 <body>
-  <div class="terminal-bg" aria-hidden="true">
-  <pre id="terminalText"></pre>
-</div>
   <!-- Boot animation screen -->
-  <div class="terminal-startup" id="terminalStartup"></div>
+  <div class="terminal-startup" id="terminalStartup">Click to boot<span class="cursor">_</span></div>
 
   <!-- App container (initially hidden) -->
   <div class="container hidden" id="appContainer">
@@ -92,6 +89,11 @@
           thread: [{ sender: "user", message, timestamp: new Date().toISOString() }],
           timestamp: serverTimestamp()
         });
+
+        // Play sound again after submitting
+        bootSound.currentTime = 0;
+        bootSound.play().catch(() => {});
+
         statusText.textContent = "✅ Advice submitted!";
         adviceInput.value = "";
       } catch (e) {
@@ -158,62 +160,36 @@
     logoutBtn.onclick = () => signOut(auth);
   </script>
 
-  <!-- Boot animation typing -->
+  <!-- Boot animation typing script -->
   <script>
-  const bootText = "Booting Advice System...";
-  const startupDiv = document.getElementById("terminalStartup");
-  const appContainer = document.getElementById("appContainer");
-  const bootSound = document.getElementById("bootSound");
+    const startupDiv = document.getElementById("terminalStartup");
+    const appContainer = document.getElementById("appContainer");
+    const bootSound = document.getElementById("bootSound");
+    const bootText = "Booting Advice System...";
 
-  // Show "Click to boot..." with blinking cursor
-  startupDiv.innerHTML = "Click to boot<span class='cursor'>_</span>";
-
-  function typeBoot() {
-    let i = 0;
-    function next() {
-      if (i < bootText.length) {
-        startupDiv.innerHTML = bootText.slice(0, i + 1) + '<span class="cursor">_</span>';
-        i++;
-        setTimeout(next, 75);
-      } else {
-        setTimeout(() => {
-          startupDiv.remove();
-          appContainer.classList.remove("hidden");
-        }, 800);
+    function typeBoot() {
+      let i = 0;
+      function next() {
+        if (i < bootText.length) {
+          startupDiv.innerHTML = bootText.slice(0, i + 1) + '<span class="cursor">_</span>';
+          i++;
+          setTimeout(next, 75);
+        } else {
+          setTimeout(() => {
+            startupDiv.remove();
+            appContainer.classList.remove("hidden");
+          }, 800);
+        }
       }
+      next();
     }
-    next();
-  }
 
-  // Start boot on click
-  window.addEventListener("click", function trigger() {
-    bootSound.currentTime = 0;
-    bootSound.play().catch(() => {});
-    typeBoot();
-    window.removeEventListener("click", trigger);
-  });
-</script>
-<script>
-  const terminalText = document.getElementById("terminalText");
-  const lines = [
-    "Loading BIOS...",
-    "Initializing memory...",
-    "Checking device manager...",
-    "Starting neural shell...",
-    "Authenticating...",
-    "Link established.",
-    "Decrypting transmissions...",
-    "Bootloader initialized.",
-    "Running terminal diagnostics...",
-    "System secure."
-  ];
-
-  let text = "";
-  for (let i = 0; i < 200; i++) {
-    text += lines[Math.floor(Math.random() * lines.length)] + "\n";
-  }
-
-  terminalText.textContent = text;
-</script>
+    window.addEventListener("click", function trigger() {
+      bootSound.currentTime = 0;
+      bootSound.play().catch(() => {});
+      typeBoot();
+      window.removeEventListener("click", trigger);
+    });
+  </script>
 </body>
 </html>
