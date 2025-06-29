@@ -16,13 +16,13 @@
 
     <!-- Admin View -->
     <div id="adminPanel" style="display:none;">
-      <h3>All User Advice</h3>
+      <h3>All User Conversations</h3>
       <div id="adminAdviceList"></div>
     </div>
 
     <!-- User View -->
     <div id="userPanel">
-      <h3>Your Advice</h3>
+      <h3>Your Conversations</h3>
       <div id="userAdviceList"></div>
     </div>
 
@@ -32,7 +32,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, setDoc, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBiNKDXds9IWjFAwSbJaNN8Zd37Wujk5Kc",
@@ -45,8 +45,8 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    const adminEmail = "wuhung0501@gmail.com"; // set your actual admin email here
-    
+    const adminEmail = "admin@example.com"; // Update to your real admin email
+
     const userNameSpan = document.getElementById("userName");
     const adviceInput = document.getElementById("adviceInput");
     const submitBtn = document.getElementById("submitAdvice");
@@ -81,8 +81,13 @@
       try {
         await addDoc(collection(db, "advices"), {
           userEmail: currentUser.email,
-          message,
-          reply: "",
+          thread: [
+            {
+              sender: "user",
+              message,
+              timestamp: new Date().toISOString()
+            }
+          ],
           timestamp: serverTimestamp()
         });
         statusText.textContent = "✅ Advice submitted!";
@@ -102,10 +107,13 @@
         const data = docSnap.data();
         const div = document.createElement("div");
         div.classList.add("feedback-item");
+
+        const messages = data.thread.map(m => `<p><strong>${m.sender}:</strong> ${m.message}</p>`).join("");
+
         div.innerHTML = `
           <strong>${data.userEmail}</strong><br>
-          <p>${data.message}</p>
-          <textarea placeholder="Write a reply...">${data.reply || ""}</textarea>
+          ${messages}
+          <textarea placeholder="Reply..."></textarea>
           <button>Send Reply</button>
         `;
 
@@ -113,10 +121,14 @@
         const replyInput = div.querySelector("textarea");
 
         replyBtn.onclick = async () => {
-          await updateDoc(doc(db, "advices", docSnap.id), {
-            reply: replyInput.value
-          });
-          alert("✅ Reply sent!");
+          const newReply = {
+            sender: "admin",
+            message: replyInput.value,
+            timestamp: new Date().toISOString()
+          };
+          const updatedThread = [...data.thread, newReply];
+          await updateDoc(doc(db, "advices", docSnap.id), { thread: updatedThread });
+          loadAllAdvice();
         };
 
         adminAdviceList.appendChild(div);
@@ -132,10 +144,29 @@
         const data = docSnap.data();
         const div = document.createElement("div");
         div.classList.add("feedback-item");
+
+        const messages = data.thread.map(m => `<p><strong>${m.sender}:</strong> ${m.message}</p>`).join("");
+
         div.innerHTML = `
-          <p><strong>You:</strong> ${data.message}</p>
-          ${data.reply ? `<p><strong>Admin:</strong> ${data.reply}</p>` : "<p><em>No reply yet.</em></p>"}
+          ${messages}
+          <textarea placeholder="Reply..."></textarea>
+          <button>Reply</button>
         `;
+
+        const replyBtn = div.querySelector("button");
+        const replyInput = div.querySelector("textarea");
+
+        replyBtn.onclick = async () => {
+          const newReply = {
+            sender: "user",
+            message: replyInput.value,
+            timestamp: new Date().toISOString()
+          };
+          const updatedThread = [...data.thread, newReply];
+          await updateDoc(doc(db, "advices", docSnap.id), { thread: updatedThread });
+          loadUserAdvice();
+        };
+
         userAdviceList.appendChild(div);
       });
     }
