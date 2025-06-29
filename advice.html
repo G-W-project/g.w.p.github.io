@@ -8,21 +8,28 @@
 </head>
 <body>
   <div class="terminal-startup" id="terminalStartup">Click to boot<span class="cursor">_</span></div>
+
   <div class="container hidden" id="appContainer">
     <h2>Welcome, <span id="userName"></span>!</h2>
+
     <textarea id="adviceInput" placeholder="Enter your advice or concern..."></textarea>
     <button id="submitAdvice">Submit Advice</button>
     <p id="status"></p>
+
     <div id="adminPanel" style="display: none;">
       <h3>All Conversations</h3>
       <div id="adminAdviceList"></div>
     </div>
+
     <div id="userPanel">
       <h3>Your Conversation</h3>
       <div id="userAdviceList"></div>
     </div>
+
     <button id="logoutBtn">Logout</button>
   </div>
+
+  <!-- Firebase + Logic -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -57,8 +64,11 @@
     onAuthStateChanged(auth, (user) => {
       if (!user) return window.location.href = "login.html";
       currentUser = user;
+
       userNameSpan.textContent =
-  user.email === adminEmail? "Admin" : (user.displayName || user.email.split("@")[0]);
+        user.email === adminEmail
+          ? "Admin"
+          : (user.displayName || user.email.split("@")[0]);
 
       if (user.email === adminEmail) {
         adminPanel.style.display = "block";
@@ -81,8 +91,10 @@
           thread: [{ sender: "user", message, timestamp: new Date().toISOString() }],
           timestamp: serverTimestamp()
         });
+
         bootSound.currentTime = 0;
         bootSound.play().catch(() => {});
+
         statusText.textContent = "☑ Advice submitted!";
         adviceInput.value = "";
       } catch {
@@ -149,11 +161,21 @@
     logoutBtn.onclick = () => signOut(auth);
   </script>
 
+  <!-- Boot animation & sound logic -->
   <script>
     const startupDiv = document.getElementById("terminalStartup");
     const appContainer = document.getElementById("appContainer");
     const bootSound = document.getElementById("bootSound");
     const bootText = "Booting Advice System...";
+
+    let bootLoopCount = 1;
+    bootSound.addEventListener("ended", () => {
+      if (bootLoopCount < 3) {
+        bootLoopCount++;
+        bootSound.currentTime = 0;
+        bootSound.play().catch(() => {});
+      }
+    });
 
     function typeBoot() {
       let i = 0;
