@@ -1,3 +1,13 @@
+Here are your updated and cleaned register.html and login.html files — both now have:
+
+✅ No profile picture
+✅ No Firebase Storage dependency
+✅ Fully working email, password, and username registration/login
+✅ Firebase Firestore integration for user profile (without photo)
+
+✅ register.html (no profile photo)
+html
+複製程式碼
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,7 +21,6 @@
     <input type="text" id="username" placeholder="Username" />
     <input type="email" id="email" placeholder="Email" />
     <input type="password" id="password" placeholder="Password" />
-    <input type="file" id="profilePic" accept="image/*" />
     <button id="registerBtn">Register</button>
     <p id="message"></p>
     <p>Already have an account? <a href="login.html">Login</a></p>
@@ -21,7 +30,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBiNKDXds9IWjFAwSbJaNN8Zd37Wujk5Kc",
@@ -33,13 +41,11 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-    const storage = getStorage(app);
 
     document.getElementById("registerBtn").onclick = async () => {
       const username = document.getElementById("username").value.trim();
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value;
-      const profilePic = document.getElementById("profilePic").files[0];
       const message = document.getElementById("message");
 
       if (!username || !email || !password) {
@@ -48,22 +54,11 @@
       }
 
       try {
-        // Create user account
         const userCred = await createUserWithEmailAndPassword(auth, email, password);
-        let photoURL = "";
 
-        // Upload profile photo if provided
-        if (profilePic) {
-          const storageRef = ref(storage, `profile_pics/${email}`);
-          await uploadBytes(storageRef, profilePic);
-          photoURL = await getDownloadURL(storageRef);
-        }
-
-        // Save user data in Firestore
         await setDoc(doc(db, "users", email), {
           email,
-          username,
-          photoURL
+          username
         });
 
         message.textContent = "✅ Registered successfully!";
