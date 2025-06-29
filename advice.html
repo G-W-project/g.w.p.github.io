@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Advice System</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h2>Welcome, <span id="userName"></span>!</h2>
+
+    <!-- Advice Submission -->
+    <textarea id="adviceInput" placeholder="Enter your advice or concern..."></textarea>
+    <button id="submitAdvice">Submit Advice</button>
+    <p id="status"></p>
+
+    <!-- Admin View -->
+    <div id="adminPanel" style="display:none;">
+      <h3>All User Advice</h3>
+      <div id="adminAdviceList"></div>
+    </div>
+
+    <!-- User View -->
+    <div id="userPanel">
+      <h3>Your Advice</h3>
+      <div id="userAdviceList"></div>
+    </div>
+
+    <button id="logoutBtn">Logout</button>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBiNKDXds9IWjFAwSbJaNN8Zd37Wujk5Kc",
+      authDomain: "grid-walker-project.firebaseapp.com",
+      projectId: "grid-walker-project",
+      appId: "grid walker project"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const adminEmail = "wuhung0501@gmail.com"; // set your actual admin email here
+    
+    const userNameSpan = document.getElementById("userName");
+    const adviceInput = document.getElementById("adviceInput");
+    const submitBtn = document.getElementById("submitAdvice");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const statusText = document.getElementById("status");
+
+    const adminPanel = document.getElementById("adminPanel");
+    const adminAdviceList = document.getElementById("adminAdviceList");
+    const userPanel = document.getElementById("userPanel");
+    const userAdviceList = document.getElementById("userAdviceList");
+
+    let currentUser;
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) return window.location.href = "login.html";
+      currentUser = user;
+      userNameSpan.textContent = user.email;
+
+      if (user.email === adminEmail) {
+        adminPanel.style.display = "block";
+        userPanel.style.display = "none";
+        loadAllAdvice();
+      } else {
+        loadUserAdvice();
+      }
+    });
+
+    submitBtn.onclick = async () => {
+      const message = adviceInput.value.trim();
+      if (!message) return;
+
+      try {
+        await addDoc(collection(db, "advices"), {
+          userEmail: currentUser.email,
+          message,
+          reply: "",
+          timestamp: serverTimestamp()
+        });
+        statusText.textContent = "✅ Advice submitted!";
+        adviceInput.value = "";
+        if (currentUser.email !== adminEmail) loadUserAdvice();
+      } catch (e) {
+        statusText.textContent = "❌ Failed to submit.";
+      }
+    };
+
+    async function loadAllAdvice() {
+      const q = query(collection(db, "advices"));
+      const snapshot = await getDocs(q);
+      adminAdviceList.innerHTML = "";
+
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        const div = document.createElement("div");
+        div.classList.add("feedback-item");
+        div.innerHTML = `
+          <strong>${data.userEmail}</strong><br>
+          <p>${data.message}</p>
+          <textarea placeholder="Write a reply...">${data.reply || ""}</textarea>
+          <button>Send Reply</button>
+        `;
+
+        const replyBtn = div.querySelector("button");
+        const replyInput = div.querySelector("textarea");
+
+        replyBtn.onclick = async () => {
+          await updateDoc(doc(db, "advices", docSnap.id), {
+            reply: replyInput.value
+          });
+          alert("✅ Reply sent!");
+        };
+
+        adminAdviceList.appendChild(div);
+      });
+    }
+
+    async function loadUserAdvice() {
+      const q = query(collection(db, "advices"), where("userEmail", "==", currentUser.email));
+      const snapshot = await getDocs(q);
+      userAdviceList.innerHTML = "";
+
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        const div = document.createElement("div");
+        div.classList.add("feedback-item");
+        div.innerHTML = `
+          <p><strong>You:</strong> ${data.message}</p>
+          ${data.reply ? `<p><strong>Admin:</strong> ${data.reply}</p>` : "<p><em>No reply yet.</em></p>"}
+        `;
+        userAdviceList.appendChild(div);
+      });
+    }
+
+    logoutBtn.onclick = () => signOut(auth);
+  </script>
+</body>
+</html>
