@@ -1,33 +1,44 @@
-<!-- login.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>Login</title>
-  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="container">
-    <h2>Login</h2>
-    <input type="text" id="username" placeholder="Username" />
-    <input type="password" id="password" placeholder="Password" />
-    <button onclick="login()">Login</button>
-    <p>Don't have an account? <a href="register.html">Register</a></p>
-  </div>
+  <h2>Login</h2>
+  <input type="email" id="email" placeholder="Email" />
+  <input type="password" id="password" placeholder="Password" />
+  <button id="loginBtn">Login</button>
+  <p id="message"></p>
+  <p>Don't have an account? <a href="register.html">Register</a></p>
 
-  <script>
-    function login() {
-      const username = document.getElementById("username").value.trim();
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    document.getElementById("loginBtn").onclick = async () => {
+      const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
+      const message = document.getElementById("message");
 
-      const users = JSON.parse(localStorage.getItem("users") || "{}");
-      if (users[username] && users[username] === password) {
-        localStorage.setItem("currentUser", JSON.stringify({ username }));
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        message.textContent = "✅ Logged in!";
         window.location.href = "index.html";
-      } else {
-        alert("Invalid username or password.");
+      } catch (error) {
+        message.textContent = "❌ " + error.message;
       }
-    }
+    };
   </script>
 </body>
 </html>
