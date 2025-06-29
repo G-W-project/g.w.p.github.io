@@ -57,7 +57,8 @@
     onAuthStateChanged(auth, (user) => {
       if (!user) return window.location.href = "login.html";
       currentUser = user;
-      userNameSpan.textContent = (user.email == adminEmail) ? "Admin snailwu" : user.username;
+      userNameSpan.textContent =
+  user.email === adminEmail? "Admin" : (user.displayName || user.email.split("@")[0]);
 
       if (user.email === adminEmail) {
         adminPanel.style.display = "block";
